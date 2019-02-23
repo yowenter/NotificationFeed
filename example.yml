@@ -1,0 +1,14 @@
+version: "3"
+services:
+    notification_feed:
+      image: daocloud.io/airywenter/notification-feed:master
+      environment:
+      - NETEASE_163_EMAIL=XXX@163.com
+      - NETEASE_163_PASSWD=XXXXX
+      - MANAGER_EMAIL=XXXX@XXX.com
+      - GITHUB_ACCESS_TOKEN=XXXXXX
+      - REDIS_URL=redis://redis/0
+
+    redis:
+      image: redis:4.0
+

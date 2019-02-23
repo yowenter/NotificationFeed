@@ -28,9 +28,10 @@ class Notification(object):
 
 
 class SimpleMessage(object):
-    def __init__(self, url, summary):
+    def __init__(self, url, summary, tags=None):
         self.url = url
         self.summary = summary
+        self.tags = ','.join(tags) if tags else ''
 
 
 SimpleMessages = List[SimpleMessage]
@@ -54,13 +55,13 @@ class IssuesNotification(Notification):
 
     @property
     def messages(self) -> SimpleMessages:
-        return [SimpleMessage(issue.url, "#{0} [{1}]: {2}".format(issue.id, issue.repo_name, issue.title)) for issue in
-                self.issues]
+        return [SimpleMessage(issue.url, "#{0} [{1}]: {2}".format(issue.id, issue.repo_name, issue.title), issue.labels)
+                for issue in
+                self.issues[:20]]
 
-
-if __name__ == '__main__':
-    from models.issue import NotificationIssue
-
-    issues = [NotificationIssue(i, "Example", [], "https://api.github.com/repos/kubernetes/kubernetes/issues/74446") for
-              i in range(10)]
-    print(IssuesNotification("Example", issues, 'summary').render_html())
+# if __name__ == '__main__':
+#     from models.issue import NotificationIssue
+#
+#     issues = [NotificationIssue(i, "Example", [], "https://api.github.com/repos/kubernetes/kubernetes/issues/74446") for
+#               i in range(10)]
+#     print(IssuesNotification("Example", issues, 'summary').render_html())

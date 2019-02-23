@@ -1,11 +1,14 @@
 import smtplib
 import ssl
+import logging
 from models.notification import Notification
 
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 from common.config import NETEASE_163_EMAIL, NETEASE_163_PASSWD, MANAGER_EMAIL
+
+LOG = logging.getLogger(__name__)
 
 smtp_server = "smtp.163.com"
 port = 465
@@ -16,8 +19,6 @@ password = NETEASE_163_PASSWD
 # Create a secure SSL context
 context = ssl.create_default_context()
 
-mail_server = smtplib.SMTP_SSL(smtp_server, port, context=context)
-mail_server.login(user, password)
 
 
 def send_notification(notification: Notification):
@@ -28,8 +29,14 @@ def send_notification(notification: Notification):
     message['To'] = MANAGER_EMAIL
     message['Subject'] = notification.get_title()
 
-    message.preamble = notification.summary()
+    # message.preamble = notification.summary()
 
     message.attach(MIMEText(notification.render_html(), "HTML"))
-
-    mail_server.send_message(message)
+    try:
+        mail_server = smtplib.SMTP_SSL(smtp_server, port, context=context)
+        mail_server.login(user, password)
+        mail_server.send_message(message)
+    except Exception as e:
+        LOG.warning("Send Email failure %s", str(e))
+    else:
+        LOG.info("Send Email %s to %s success.", notification.get_title(), MANAGER_EMAIL)

@@ -1,17 +1,21 @@
-from stream_framework.feeds.aggregated_feed.notification_feed import RedisNotificationFeed
+# from stream_framework.feeds.aggregated_feed.notification_feed import RedisNotificationFeed
 from stream_framework.verbs.base import Verb
 from stream_framework.aggregators.base import BaseAggregator
+
+from stream_framework.feeds.redis import RedisFeed
+
+from stream_framework.storage.redis.activity_storage import RedisActivityStorage
+from stream_framework.storage.redis.timeline_storage import RedisTimelineStorage
 
 
 # https://stream-framework.readthedocs.io/en/latest/notification_systems.html
 
-class ManagerNotificationFeed(RedisNotificationFeed):
-    # : they key format determines where the data gets stored
-    key_format = 'feed:notification:%(user_id)s'
+class ManagerNotificationFeed(RedisFeed):
+    pass
 
 
 class IssueVerb(Verb):
-    id = 5
+    id = 10
     infinitive = 'issue'
     past_tense = 'issued'
 

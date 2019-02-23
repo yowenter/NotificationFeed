@@ -11,7 +11,7 @@
     <h3>{{summary}}</h3>
     <ul>
         {% for message in messages %}
-        <li><a href="{{ message.url }}">{{ message.summary }}</a></li>
+        <li><a href="{{ message.url }}">{{ message.summary }}</a> {{message.tags}} </li>
         {% endfor %}
     </ul>
 </div>

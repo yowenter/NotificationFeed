@@ -3,36 +3,73 @@ import time
 import logging
 import signal
 import sys
+from noti_feed import setup_feed
+setup_feed()
+
 from datetime import datetime
 from watcher.github_service import RepoIssueWatcher
 from noti_feed.manager import new_issues
+from noti_feed.feed import ManagerNotificationFeed
+from models.notification import IssuesNotification
+from models.issue import NotificationIssue
 from common.config import PROD
+from email_service.email_sender import send_notification
 import errno
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO if PROD == 'true' else logging.DEBUG)
 
+logging.getLogger("stream_framework").setLevel(logging.WARN)
+logging.getLogger("urllib3").setLevel(logging.WARN)
+logging.getLogger("github").setLevel(logging.WARN)
+
 LOG = logging.getLogger(__name__)
+
+MANAGER = "manager"
+
 
 
 def notification_watcher():
     LOG.info("Starting repo issue watch service...")
     k8s_repo = RepoIssueWatcher("kubernetes/kubernetes")
     prometheus_repo = RepoIssueWatcher("prometheus/prometheus")
-    user_id = "manager"
+    test_repo = RepoIssueWatcher("yowenter/findtypo")
 
     while 1:
+        issues = []
         k8s_issues = k8s_repo.fetch_new_issues()
         prometheus_issues = prometheus_repo.fetch_new_issues()
-
-        new_issues(user_id, k8s_issues + prometheus_issues)
+        test_issues = test_repo.fetch_new_issues()
+        if test_issues:
+            issues.extend(test_issues)
+        if k8s_issues:
+            issues.extend(k8s_issues)
+        if prometheus_issues:
+            issues.extend(prometheus_issues)
+        notification_issues = [NotificationIssue.from_github_issue(i) for i in issues]
+        LOG.info("New notification issues  %s queued.", len(notification_issues))
+        new_issues(MANAGER, notification_issues)
 
         time.sleep(180)
 
 
-def notification_sender():
+def notification_consumer():
     LOG.info("Starting notification sender service...")
-    while 1:
-        time.sleep(1)
+    feed = ManagerNotificationFeed(MANAGER)
+
+    while True:
+        activities = feed[:]
+        issues = [NotificationIssue.from_dict(activity.extra_context) for activity in activities]
+        title = "[GitHub Issue 提醒 ] {0} 你有 {1} 条新消息未读".format(datetime.now().date(), len(activities))
+
+        summary = title
+        if len(issues) >= 1:
+            LOG.info("Sending Message %s", title)
+            notification = IssuesNotification(title, issues, summary)
+            send_notification(notification)
+            feed.remove_many(activities)
+            [feed.remove_activity(ac) for ac in activities]
+
+        time.sleep(1800)
 
 
 class Manager(object):
@@ -66,8 +103,9 @@ class Manager(object):
     def start(self):
         start = datetime.now()
         self.spawn_worker(notification_watcher)
-        self.spawn_worker(notification_sender)
+        self.spawn_worker(notification_consumer)
         while 1:
+            time.sleep(10)
             if self.exit_now:
                 LOG.info("Gracefully stop.")
                 break
@@ -76,7 +114,6 @@ class Manager(object):
                 self.kill(signal.SIGKILL, None)
                 sys.exit(1)
 
-            time.sleep(3)
             LOG.info("Heartbeat, stay alive since `%s`.for %s", start, datetime.now() - start)
             LOG.debug("Workers %s", self.WORKERS)
 
@@ -108,6 +145,9 @@ def main():
     signal.signal(signal.SIGTERM, manager.kill)
 
     manager.start()
+
+    # notification_watcher()
+    # notification_consumer()
 
 
 # start 2 processes,
