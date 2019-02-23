@@ -16,15 +16,6 @@ class IssueVerb(Verb):
     past_tense = 'issued'
 
 
-class Issue(object):
-    def __init__(self, issue_id, title, labels, url, repo_name):
-        self.id = issue_id
-        self.title = title
-        self.labels = labels
-        self.url = url
-        self.repo_name = repo_name
-
-
 class VerbDailyAggregator(BaseAggregator):
     '''
     Aggregates based on the same verb and same time period

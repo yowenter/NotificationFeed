@@ -1,0 +1,21 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>{{title}}</title>
+    <!--<style type="text/css">-->
+
+    <!--</style>-->
+</head>
+<body>
+<div>
+    <h3>{{summary}}</h3>
+    <ul>
+        {% for message in messages %}
+        <li><a href="{{ message.url }}">{{ message.summary }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+
+</body>
+
+</html>

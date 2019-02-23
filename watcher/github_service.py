@@ -24,6 +24,6 @@ class RepoIssueWatcher(object):
         self.current_issue_no = issues[0].number
         return new_issues
 
-# if __name__ == '__main__':
-#     repo_watcher = RepoIssueWatcher('kubernetes/kubernetes')
-#     print(repo_watcher.fetch_new_issues())
+if __name__ == '__main__':
+    repo_watcher = RepoIssueWatcher('kubernetes/kubernetes')
+    print(repo_watcher.fetch_new_issues())
