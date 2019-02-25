@@ -25,7 +25,7 @@ class RepoIssueWatcher(object):
 
         if self.current_issue_no >= issues[0].number:
             # no new issue found
-            return
+            return []
 
         new_issues = [issue for issue in issues if issue.number > self.current_issue_no]
         self.current_issue_no = issues[0].number

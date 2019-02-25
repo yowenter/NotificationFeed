@@ -4,6 +4,7 @@ import logging
 import signal
 import sys
 from noti_feed import setup_feed
+
 setup_feed()
 
 from datetime import datetime
@@ -27,24 +28,16 @@ LOG = logging.getLogger(__name__)
 MANAGER = "manager"
 
 
-
 def notification_watcher():
     LOG.info("Starting repo issue watch service...")
-    k8s_repo = RepoIssueWatcher("kubernetes/kubernetes")
-    prometheus_repo = RepoIssueWatcher("prometheus/prometheus")
-    test_repo = RepoIssueWatcher("yowenter/findtypo")
 
+    repos = ["kubernetes/kubernetes", "prometheus/prometheus", "goharbor/harbor"]
+    issue_watchers = [RepoIssueWatcher(repo) for repo in repos]
     while 1:
         issues = []
-        k8s_issues = k8s_repo.fetch_new_issues()
-        prometheus_issues = prometheus_repo.fetch_new_issues()
-        test_issues = test_repo.fetch_new_issues()
-        if test_issues:
-            issues.extend(test_issues)
-        if k8s_issues:
-            issues.extend(k8s_issues)
-        if prometheus_issues:
-            issues.extend(prometheus_issues)
+        for watcher in issue_watchers:
+            issues.extend(watcher.fetch_new_issues())
+
         notification_issues = [NotificationIssue.from_github_issue(i) for i in issues]
         LOG.info("New notification issues  %s queued.", len(notification_issues))
         new_issues(MANAGER, notification_issues)
