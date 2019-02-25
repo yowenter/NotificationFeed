@@ -9,7 +9,7 @@ LOG = logging.getLogger(__name__)
 
 class RepoIssueWatcher(object):
     def __init__(self, repo_full_name):
-        self.current_issue_no = 1
+        self.current_issue_no = 0
         self.repo_full_name = repo_full_name
         self.repo = None
 
@@ -21,7 +21,13 @@ class RepoIssueWatcher(object):
         except Exception as e:
             issues = []
             LOG.warning("fetch github issues error %s %s", self.repo_full_name, e)
-            return issues
+
+        if len(issues) < 1:
+            return []
+
+        if self.current_issue_no == 0:
+            # that means first run..
+            self.current_issue_no = issues[0].number
 
         if self.current_issue_no >= issues[0].number:
             # no new issue found
