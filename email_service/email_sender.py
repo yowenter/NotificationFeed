@@ -20,13 +20,12 @@ password = NETEASE_163_PASSWD
 context = ssl.create_default_context()
 
 
-
 def send_notification(notification: Notification):
     # https://www.spritecloud.com/2010/03/creating-and-sending-html-e-mails-with-python/
     message = MIMEMultipart('alternative')
 
     message['From'] = NETEASE_163_EMAIL
-    message['To'] = MANAGER_EMAIL
+    # message['To'] = MANAGER_EMAIL
     message['Subject'] = notification.get_title()
 
     # message.preamble = notification.summary()
@@ -35,7 +34,7 @@ def send_notification(notification: Notification):
     try:
         mail_server = smtplib.SMTP_SSL(smtp_server, port, context=context)
         mail_server.login(user, password)
-        mail_server.send_message(message)
+        mail_server.send_message(message, to_addrs=MANAGER_EMAIL.split(','))
     except Exception as e:
         LOG.warning("Send Email failure %s", str(e))
     else:
