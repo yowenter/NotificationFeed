@@ -64,7 +64,7 @@ def notification_consumer():
             [feed.remove_activity(ac) for ac in activities]
 
         current_hour = datetime.now().hour
-        density = hour_density(current_hour + 8)  # Asia/shanghai timeonze offset 8
+        density = hour_density((current_hour + 8) % 24)  # Asia/shanghai timeonze offset 8
         should_sleep = int(3600 * (1.5 - density))  # 最短sleep 30mins, 最长sleep 1.5 H
         LOG.info("Current time %s, should sleep %s ", datetime.now(), should_sleep)
         time.sleep(should_sleep)
