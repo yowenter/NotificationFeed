@@ -13,6 +13,7 @@ from noti_feed.manager import new_issues
 from noti_feed.feed import ManagerNotificationFeed
 from models.notification import IssuesNotification
 from models.issue import NotificationIssue
+from utils.density import hour_density
 from common.config import PROD
 from email_service.email_sender import send_notification
 import errno
@@ -62,7 +63,11 @@ def notification_consumer():
             feed.remove_many(activities)
             [feed.remove_activity(ac) for ac in activities]
 
-        time.sleep(1800)
+        current_hour = datetime.now().hour
+        density = hour_density(current_hour + 8)  # Asia/shanghai timeonze offset 8
+        should_sleep = int(3600 * (1.5 - density))  # 最短sleep 30mins, 最长sleep 1.5 H
+        LOG.info("Current time %s, should sleep %s ", datetime.now(), should_sleep)
+        time.sleep(should_sleep)
 
 
 class Manager(object):
