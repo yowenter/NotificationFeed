@@ -53,7 +53,7 @@ def notification_consumer():
     while True:
         activities = feed[:]
         issues = [NotificationIssue.from_dict(activity.extra_context) for activity in activities]
-        title = "[GitHub Issue 提醒 ] {0} 你有 {1} 条新消息未读".format(datetime.now().date(), len(activities))
+        title = "[GitHub Issue 提醒 ] {0} 你有 {1} 条新消息未读".format(datetime.now().replace(microsecond=0, second=0), len(activities))
 
         summary = title
         if len(issues) >= 1:
@@ -65,7 +65,7 @@ def notification_consumer():
 
         current_hour = datetime.now().hour
         density = hour_density((current_hour + 8) % 24)  # Asia/shanghai timeonze offset 8
-        should_sleep = int(3600 * (1.5 - density))  # 最短sleep 30mins, 最长sleep 1.5 H
+        should_sleep = int(3600 * (1.8 - density)*(1.6 - density))  # 最短sleep 30mins, 最长sleep 1.5 H
         LOG.info("Current time %s, should sleep %s ", datetime.now(), should_sleep)
         time.sleep(should_sleep)
 
