@@ -35,7 +35,11 @@ def send_notification(notification: Notification):
         mail_server = smtplib.SMTP_SSL(smtp_server, port, context=context)
         mail_server.login(user, password)
         mail_server.send_message(message, to_addrs=MANAGER_EMAIL.split(','))
+
     except Exception as e:
         LOG.warning("Send Email failure %s", str(e))
+        return -1
     else:
         LOG.info("Send Email %s to %s success.", notification.get_title(), MANAGER_EMAIL)
+        return 1
+

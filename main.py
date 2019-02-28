@@ -53,19 +53,19 @@ def notification_consumer():
     while True:
         activities = feed[:]
         issues = [NotificationIssue.from_dict(activity.extra_context) for activity in activities]
-        title = "[CNCF Project 提醒 ] 有 {0} 条新 Issue ".format(len(activities))
+        title = "[CNCF 项目更新提醒 ] 你有 {0} 条新消息 ".format(len(activities))
 
         summary = title
         if len(issues) >= 1:
             LOG.info("Sending Message %s", title)
             notification = IssuesNotification(title, issues, summary)
-            send_notification(notification)
-            feed.remove_many(activities)
-            [feed.remove_activity(ac) for ac in activities]
+            if send_notification(notification) > 0:
+                feed.remove_many(activities)
+                [feed.remove_activity(ac) for ac in activities]
 
         current_hour = datetime.now().hour
         density = hour_density((current_hour + 8) % 24)  # Asia/shanghai timeonze offset 8
-        should_sleep = int(3600 * (2 - density)*(1.5 - density))  # 最短sleep 30mins, 最长sleep 1.5 H
+        should_sleep = int(3600 * (2 - density) * (1.5 - density))  # 最短sleep 30mins, 最长sleep 3 H
         LOG.info("Current time %s, should sleep %s ", datetime.now(), should_sleep)
         time.sleep(should_sleep)
 
