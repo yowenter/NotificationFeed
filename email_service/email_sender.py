@@ -43,3 +43,13 @@ def send_notification(notification: Notification):
         LOG.info("Send Email %s to %s success.", notification.get_title(), MANAGER_EMAIL)
         return 1
 
+
+# if __name__ == '__main__':
+#     from models.notification import IssuesNotification
+#     from models.issue import NotificationIssue
+#
+#     send_notification(IssuesNotification("[GitHub Issue 更新] 2019-03-01 你有 8 条新消息未读 ",
+#
+#                                          [NotificationIssue("12345", "项目 飞天计划 更新", ["test", "kind/bug"],
+#                                                             "https://github.com/repos/realityone/docker-image-py/issues/1")]
+#                                          ))
