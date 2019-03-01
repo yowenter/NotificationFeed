@@ -53,7 +53,7 @@ def notification_consumer():
     while True:
         activities = feed[:]
         issues = [NotificationIssue.from_dict(activity.extra_context) for activity in activities]
-        title = "[CNCF 更新提醒 ] {0} 你有 {1} 条新消息 ".format(datetime.now().date(), len(activities))
+        title = "[CNCF 项目 ] {0} 你有 {1} 条新消息未读 ".format(datetime.now().date(), len(activities))
 
         summary = title
         if len(issues) >= 1:
