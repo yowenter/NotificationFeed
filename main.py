@@ -51,6 +51,13 @@ def notification_consumer():
     feed = ManagerNotificationFeed(MANAGER)
 
     while True:
+        current_hour = datetime.now().hour
+        work_hours = list(range(10, 22))
+        if current_hour + 8 not in work_hours:
+            LOG.info("Not in work hours, continue %s", current_hour)
+            time.sleep(1000)
+            continue
+
         activities = feed[:]
         issues = [NotificationIssue.from_dict(activity.extra_context) for activity in activities]
         title = "[CNCF GitHub Issue 提醒] {0} 你有 {1} 条新消息未读 ".format(datetime.now().date(), len(activities))
@@ -63,8 +70,8 @@ def notification_consumer():
                 feed.remove_many(activities)
                 [feed.remove_activity(ac) for ac in activities]
 
-        current_hour = datetime.now().hour
         density = hour_density((current_hour + 8) % 24)  # Asia/shanghai timeonze offset 8
+
         should_sleep = int(3600 * (2 - density) * (1.5 - density))  # 最短sleep 30mins, 最长sleep 3 H
         LOG.info("Current time %s, should sleep %s ", datetime.now(), should_sleep)
         time.sleep(should_sleep)
