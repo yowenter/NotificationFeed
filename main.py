@@ -72,7 +72,7 @@ def notification_consumer():
 
         density = hour_density((current_hour + 8) % 24)  # Asia/shanghai timeonze offset 8
 
-        should_sleep = int(3600 * (2 - density) * (1.5 - density))  # 最短sleep 30mins, 最长sleep 3 H
+        should_sleep = int(3600 * (2 - density) * (2 - density)) + 1800  # 最短sleep 30mins, 最长sleep 3 H
         LOG.info("Current time %s, should sleep %s ", datetime.now(), should_sleep)
         time.sleep(should_sleep)
 
